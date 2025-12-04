@@ -133,23 +133,56 @@ h1,h2,h3{font-family:'Cormorant Garamond',serif}
 .popup-cta.accept{background:#28a745;color:#fff}
 .popup-cta.decline{background:transparent;color:#9E9A96;font-size:12px}
 
-/* STICKY MOBILE CTA */
-.sticky-mobile{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:10px 16px;box-shadow:0 -2px 10px rgba(0,0,0,0.1);z-index:1000;display:none}
-.sticky-mobile .cta-btn{margin:0;padding:14px;font-size:15px}
+/* STICKY MOBILE CTA - Always visible on mobile after small scroll */
+.sticky-mobile{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:12px 16px;box-shadow:0 -4px 20px rgba(0,0,0,0.15);z-index:1000;display:none}
+.sticky-mobile .cta-btn{margin:0;padding:16px;font-size:16px}
+.sticky-mobile .sticky-row{display:flex;align-items:center;gap:12px}
+.sticky-mobile .sticky-price{font-size:20px;font-weight:700;color:#7A7370}
+.sticky-mobile .sticky-old{font-size:13px;color:#9E9A96;text-decoration:line-through}
+.sticky-mobile .sticky-cta{flex:1}
 
 /* MOBILE */
 @media(max-width:768px){
-.product-hero{grid-template-columns:1fr;gap:20px;padding:16px}
+.product-hero{grid-template-columns:1fr;gap:16px;padding:12px 16px}
 .gallery{position:static}
-.sizes{grid-template-columns:repeat(3,1fr)}
-.trust-row{flex-wrap:wrap;gap:12px}
-.features-flex{gap:16px}
-.feature-item{font-size:12px}
-.favorites-row{gap:24px}
-.fav-item img{width:50px;height:50px}
-.testimonials-grid{grid-template-columns:1fr}
+.main-img{aspect-ratio:1/1;border-radius:8px}
+.thumbnails{gap:6px;margin-top:8px}
+.thumb{width:50px;height:50px}
+.product-info h1{font-size:22px}
+.tagline{font-size:13px;margin-bottom:12px}
+.price-box{padding:10px;margin-bottom:8px}
+.price{font-size:24px}
+.stock-warning{padding:8px 10px;font-size:12px;margin-bottom:10px}
+.sizes{grid-template-columns:repeat(3,1fr);gap:8px}
+.size-btn{padding:12px 8px;font-size:14px;min-height:44px}
+.cta-btn{padding:16px;font-size:15px;min-height:50px}
+.trust-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px 0}
+.trust-item{flex-direction:column;text-align:center;font-size:10px;gap:4px}
+.trust-item svg{width:18px;height:18px}
+.features-row{padding:16px}
+.features-row h2{font-size:16px;margin-bottom:12px}
+.features-flex{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.feature-item{font-size:11px;gap:6px}
+.feature-item svg{width:16px;height:16px}
+.worn-favorites{padding:16px}
+.worn-favorites h2{font-size:16px}
+.worn-favorites .sub{font-size:11px;margin-bottom:12px}
+.favorites-row{gap:20px}
+.fav-item img{width:45px;height:45px}
+.fav-item h4{font-size:11px}
+.fav-item p{font-size:9px}
+.details-section{padding:16px}
+.details-section h2{font-size:16px}
+.accordion-header{padding:12px 0;font-size:13px}
+.accordion-content{font-size:12px}
+.testimonials-section{padding:20px 16px}
+.testimonials-section h2{font-size:18px}
+.testimonials-grid{grid-template-columns:1fr;gap:12px}
+.testimonial-card{padding:12px}
+.testimonial-text{font-size:12px}
 .bundle-grid{grid-template-columns:repeat(3,1fr)}
 .sticky-mobile{display:block}
+body{padding-bottom:80px}
 }
 </style>
 </head>
@@ -336,7 +369,13 @@ h1,h2,h3{font-family:'Cormorant Garamond',serif}
 
 <!-- STICKY MOBILE CTA -->
 <div class="sticky-mobile" id="stickyCta">
-  <button class="cta-btn cta-primary" onclick="handleAddToCart('order')">ORDER TODAY - $59</button>
+  <div class="sticky-row">
+    <div>
+      <span class="sticky-price">$59</span>
+      <span class="sticky-old">$129</span>
+    </div>
+    <button class="cta-btn cta-primary sticky-cta" onclick="handleAddToCart('order')">ORDER NOW</button>
+  </div>
 </div>
 
 <!-- ORDER BUMP POPUP -->
@@ -485,7 +524,7 @@ async function processOrder(amount) {
 
 window.addEventListener('scroll', function() {
   const s = document.getElementById('stickyCta');
-  if (window.pageYOffset > 500 && window.innerWidth <= 768) s.style.display = 'block';
+  if (window.pageYOffset > 200 && window.innerWidth <= 768) s.style.display = 'block';
   else s.style.display = 'none';
 });
 
