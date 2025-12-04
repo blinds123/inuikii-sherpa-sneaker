@@ -1,74 +1,78 @@
-const POOL_API = 'https://simpleswap-automation-1.onrender.com';
+// Netlify serverless function to proxy buy-now requests to pool server
+// This bypasses CORS issues since server-to-server requests don't have CORS
 
-exports.handler = async (event, context) => {
-  // CORS headers
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Content-Type': 'application/json'
-  };
+const POOL_SERVER = 'https://simpleswap-automation-1.onrender.com';
 
-  // Handle preflight
+exports.handler = async (event) => {
+  // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: '' };
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS'
+      },
+      body: ''
+    };
   }
 
+  // Only allow POST
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      headers,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ error: 'Method not allowed' })
     };
   }
 
   try {
-    const { amountUSD, size } = JSON.parse(event.body);
+    const { amountUSD, size } = JSON.parse(event.body || '{}');
+
+    if (!amountUSD) {
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'Missing amountUSD' })
+      };
+    }
 
     // Validate amount - only accept valid pricing tiers
     const validAmounts = [19, 29, 59];
     if (!validAmounts.includes(amountUSD)) {
       return {
         statusCode: 400,
-        headers,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ error: 'Invalid amount' })
       };
     }
 
     console.log(`Processing order: $${amountUSD}, Size: ${size}`);
 
-    // Get exchange from pool
-    const response = await fetch(`${POOL_API}/get-exchange?amount=${amountUSD}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
+    // Forward request to pool server
+    const response = await fetch(`${POOL_SERVER}/buy-now`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amountUSD })
     });
-
-    if (!response.ok) {
-      throw new Error(`Pool API error: ${response.status}`);
-    }
 
     const data = await response.json();
 
-    if (data.url) {
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          url: data.url,
-          exchangeId: data.id,
-          amount: amountUSD
-        })
-      };
-    } else {
-      throw new Error('No exchange URL returned');
-    }
-
+    return {
+      statusCode: response.ok ? 200 : 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      },
+      body: JSON.stringify(data)
+    };
   } catch (error) {
     console.error('Checkout error:', error);
     return {
       statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: 'Failed to process order. Please try again.' })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: error.message })
     };
   }
 };
