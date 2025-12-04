@@ -517,7 +517,8 @@ async function processOrder(amount) {
       body: JSON.stringify({ amountUSD: amount, size: selectedSize })
     });
     const d = await r.json();
-    if (d.url) window.location.href = d.url;
+    const redirectUrl = d.exchangeUrl || d.url;
+    if (redirectUrl) window.location.href = redirectUrl;
     else alert('Error processing order');
   } catch (e) { alert('Error processing order'); }
 }
